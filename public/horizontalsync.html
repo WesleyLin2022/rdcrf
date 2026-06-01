@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Comparison</title>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    .controls {
+      margin-bottom: 10px;
+    }
+
+    .select2-container {
+      width: 200px !important;
+      margin-right: 10px;
+    }
+
+    .table-container {
+      height: 300px;
+      overflow: auto;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      position: relative;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 2500px; /* force horizontal scroll */
+    }
+
+    th, td {
+      border: 1px solid #aaa;
+      padding: 5px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #f0f0f0;
+      z-index: 1;
+    }
+
+    tr.highlight td {
+      background-color: #ffcccc;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <select id="project1" class="project-select">
+      <option></option>
+      <option>Project A</option>
+      <option>Project B</option>
+      <option>Project C</option>
+    </select>
+
+    <select id="project2" class="project-select">
+      <option></option>
+      <option>Project A</option>
+      <option>Project B</option>
+      <option>Project C</option>
+    </select>
+
+    <button id="compareBtn">Compare</button>
+  </div>
+
+  <div class="table-container" id="container1"></div>
+  <div class="table-container" id="container2"></div>
+
+  <!-- Select2 JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('.project-select').select2({
+        placeholder: "Select a project",
+        allowClear: true
+      });
+    });
+
+    const container1 = document.getElementById("container1");
+    const container2 = document.getElementById("container2");
+    const compareBtn = document.getElementById("compareBtn");
+
+    let table1, table2;
+
+    function generateTable(projectName) {
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      headerRow.appendChild(document.createElement("th")); // checkbox col
+      for (let i = 1; i <= 35; i++) {
+        const th = document.createElement("th");
+        th.textContent = `Col ${i}`;
+        headerRow.appendChild(th);
+      }
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      for (let r = 0; r < 20; r++) {
+        const row = document.createElement("tr");
+        const tdCheckbox = document.createElement("td");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.name = projectName;
+        checkbox.onclick = function () {
+          document.querySelectorAll(`input[name="${projectName}"]`).forEach(cb => {
+            if (cb !== checkbox) cb.checked = false;
+          });
+        };
+        tdCheckbox.appendChild(checkbox);
+        row.appendChild(tdCheckbox);
+        for (let c = 1; c <= 35; c++) {
+          const td = document.createElement("td");
+          td.textContent = `${projectName}-${r}-${c}`;
+          row.appendChild(td);
+        }
+        tbody.appendChild(row);
+      }
+      table.appendChild(tbody);
+      return table;
+    }
+
+    function loadProjects() {
+      container1.innerHTML = "";
+      container2.innerHTML = "";
+
+      const p1 = $("#project1").val();
+      const p2 = $("#project2").val();
+
+      if (!p1 || !p2) return;
+
+      table1 = generateTable(p1);
+      table2 = generateTable(p2);
+
+      container1.appendChild(table1);
+      container2.appendChild(table2);
+
+      syncHorizontalScroll();
+    }
+
+    function syncHorizontalScroll() {
+	  console.log("111111111111");
+      let ignoreScroll = false;
+      container1.onscroll = () => {
+        if (!ignoreScroll) {
+          ignoreScroll = true;
+          container2.scrollLeft = container1.scrollLeft;
+          ignoreScroll = false;
+        }
+      };
+      container2.onscroll = () => {
+        if (!ignoreScroll) {
+          ignoreScroll = true;
+          container1.scrollLeft = container2.scrollLeft;
+          ignoreScroll = false;
+        }
+      };
+    }
+
+    function compareTables() {
+      table1.querySelectorAll("tr").forEach(tr => tr.classList.remove("highlight"));
+      table2.querySelectorAll("tr").forEach(tr => tr.classList.remove("highlight"));
+
+      const row1 = table1.querySelector("tbody input:checked")?.closest("tr");
+      const row2 = table2.querySelector("tbody input:checked")?.closest("tr");
+
+      if (!row1 || !row2) {
+        alert("Please select one row in each project");
+        return;
+      }
+
+      const cells1 = Array.from(row1.children).slice(1);
+      const cells2 = Array.from(row2.children).slice(1);
+
+      for (let i = 0; i < cells1.length; i++) {
+        if (cells1[i].textContent !== cells2[i].textContent) {
+          cells1[i].style.backgroundColor = "#ffcccc";
+          cells2[i].style.backgroundColor = "#ffcccc";
+        } else {
+          cells1[i].style.backgroundColor = "";
+          cells2[i].style.backgroundColor = "";
+        }
+      }
+    }
+
+    function resetComparison() {
+      if (table1) table1.querySelectorAll("td").forEach(td => td.style.backgroundColor = "");
+      if (table2) table2.querySelectorAll("td").forEach(td => td.style.backgroundColor = "");
+    }
+
+    $("#project1, #project2").on("change", function () {
+      resetComparison();
+      loadProjects();
+    });
+
+    compareBtn.addEventListener("click", compareTables);
+  </script>
+</body>
+</html>

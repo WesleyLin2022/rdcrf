@@ -1,0 +1,159 @@
+/* =========================================================
+   performance.css — 混合主題設定 (深色導覽列 + 淺色內容區)
+   更新日期：2026/04/07
+   ========================================================= */
+
+/* 1. 主題變數設定 (Centralized Variables) */
+:root {
+  /* 導覽列與深色元件專用 (Dark Components) */
+  --nav-bg-dark: #1a1a1a;            /* 導覽列深背景 */
+  --nav-accent: #4b6cb7;             /* 導覽列強調色 (藍紫) */
+  
+  /* 內容區專用 (Light Content Area) */
+  --primary-color: #4b6cb7;          /* 內容區主色 */
+  --bg-light: #f8f9fa;               /* 全域淺色背景 */
+  --card-bg: #ffffff;                /* 卡片白色背景 */
+  --text-main: #333333;              /* 主要文字顏色 */
+  --text-muted: #666666;             /* 次要文字顏色 */
+  
+  /* 通用設定 */
+  --card-radius: 15px;
+  --input-radius: 10px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --transition: 0.2s ease;
+}
+
+/* 2. 全域基礎樣式 */
+body {
+  background-color: var(--bg-light); /* 內容背景改回淺色 */
+  color: var(--text-main);
+  font-family: "Noto Sans TC", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+/* 3. 深色導覽列 (Dark Navbar) */
+.navbar {
+  /* 確保導覽列使用深色漸層 */
+  background: linear-gradient(90deg, var(--nav-bg-dark), var(--nav-accent)) !important;
+  box-shadow: var(--shadow-md);
+  padding: 0.7rem 1rem;
+}
+
+.navbar-brand, .nav-link {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.nav-link:hover {
+  color: #fff !important;
+  opacity: 1;
+}
+
+/* 下拉選單 (在深色導覽列下建議維持深色或高對比) */
+.dropdown-menu {
+  background-color: #ffffff;
+  border: none;
+  box-shadow: var(--shadow-md);
+  border-radius: 10px;
+}
+
+.dropdown-item {
+  color: var(--text-main);
+}
+
+.dropdown-item:hover {
+  background-color: #f1f4f9;
+  color: var(--primary-color);
+}
+
+/* 處理 dropdown 的 active 狀態 */
+.dropdown-item.active, .dropdown-item:active {
+  background-color: var(--primary-color) !important;
+  color: #ffffff !important;
+}
+
+/* 4. 淺色卡片元件 (Light Cards) */
+.card {
+  background-color: var(--card-bg);
+  border: none;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  /* 卡片標頭可以選擇跟隨主色或導覽列色，這裡建議跟隨主色較為柔和 */
+  background: linear-gradient(90deg, var(--primary-color), #6f42c1) !important;
+  color: white !important;
+  border-top-left-radius: var(--card-radius) !important;
+  border-top-right-radius: var(--card-radius) !important;
+  padding: 1rem 1.5rem;
+}
+
+.card-body {
+  padding: 1.5rem;
+  background-color: var(--card-bg);
+  border-bottom-left-radius: var(--card-radius);
+  border-bottom-right-radius: var(--card-radius);
+}
+
+/* 5. 表單與表格 (淺色優化) */
+.form-control {
+  border: 1px solid #dee2e6;
+  border-radius: var(--input-radius);
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(75, 108, 183, 0.15);
+}
+
+.table {
+  background-color: #ffffff;
+  border-radius: 10px;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  color: var(--text-main);
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* 6. 按鈕樣式 */
+.btn-primary {
+  background: linear-gradient(90deg, var(--primary-color), #6f42c1) !important;
+  border: none;
+  border-radius: var(--input-radius);
+}
+
+.btn-danger{
+    border-radius: var(--input-radius);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  border-radius: var(--input-radius);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* 7. 其他細節 */
+h5.card-title {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.special-text {
+  color: #ADADAD; /* 亮色背景下稍微調深一點點 */
+  font-weight: bold;
+}

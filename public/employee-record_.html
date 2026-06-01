@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查詢員工紀錄</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" >
+    <link rel="stylesheet" href="../stylesheets/performance.css">
+    <script src="../javascripts/d3.v7.min.js"></script>
+    <style>
+        .chart-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+            height: 350px;
+        }
+        .chart-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+		/* 🔹（可選）設定每欄的寬度比例 */
+		#resultSection th:nth-child(1),
+		#resultSection td:nth-child(1) { width: 9%; } /* 評核類型 */
+		#resultSection th:nth-child(2),
+		#resultSection td:nth-child(2) { width: 13%; } /* 項目要點 */
+		#resultSection th:nth-child(3),
+		#resultSection td:nth-child(3) { width: 20%; }
+		#resultSection th:nth-child(4),
+		#resultSection td:nth-child(4) { width: 20%; }
+		#resultSection th:nth-child(5),
+		#resultSection td:nth-child(5) { width: 20%; } /* 三個貢獻描述 */
+		#resultSection th:nth-child(6),
+		#resultSection td:nth-child(6) { width: 8%; } /* 貢獻評核 */
+		#resultSection th:nth-child(7),
+		#resultSection td:nth-child(7) { width: 6%; } /* 得分 */
+		
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <!-- 導航欄代碼與之前相同 -->
+		<div class="container-fluid">
+            <a class="navbar-brand" href="performance.html">績效評核系統</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" id="employeeDropdown" role="button" data-bs-toggle="dropdown">
+                            員工評核作業
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item active" href="self-evaluation.html">填寫自我評核</a></li>
+                            <li><a class="dropdown-item" href="performance-record.html">查詢考績紀錄</a></li>
+                            <li><a class="dropdown-item" href="peer-evaluation.html">填寫同事評核</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="managerDropdown" role="button" data-bs-toggle="dropdown">
+                            主管評核作業
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="manager-evaluation.html">填寫員工評核</a></li>
+                            <li><a class="dropdown-item" href="employee-record.html">查詢員工紀錄</a></li>
+							<li><a class="dropdown-item" href="employee-export.html">員工紀錄匯出</a></li>
+                            <li><a class="dropdown-item" href="peer-setting.html">設定員工互評</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+				    <li class="nav-item">
+						<span class="nav-link" id="userId"></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn">登出</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">員工評核查詢</h5>
+            </div>
+            <div class="card-body">
+                <form id="searchForm" class="mb-4">
+                    <div class="row align-items-end">
+                        <div class="col-md-3">
+                            <label for="departmentCode" class="form-label">部門代碼</label>
+                            <select class="form-control" id="departmentCode" required>
+                                <option value="-1">請選擇部門</option>
+                                <option value="0">0R760</option>
+                                <option value="1">0R761</option>
+                                <option value="2">0R762</option>
+                                <option value="3">0R763</option>
+                                <option value="4">0R764</option>
+								<option value="5">0R765</option>
+								<option value="6">0R766</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="employeeId" class="form-label">員工工號</label>
+                            <select class="form-control" id="employeeId" required>
+                                <option value="">請選擇員工</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="year" class="form-label">年度</label>
+                            <select class="form-control" id="year" required>
+                                <option value="">請選擇年度</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="period" class="form-label">期間</label>
+                            <select class="form-control" id="period" required>
+                                <option value="">請選擇期間</option>
+                                <option value="年中">年中</option>
+                                <option value="年底">年底</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">查詢</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="resultSection" class="d-none">
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+								    <th>評核類型</th>
+									<th>項目要點</th>
+									<th>具體貢獻描述1</th>
+									<th>具體貢獻描述2</th>
+									<th>具體貢獻描述3</th>
+									<!--<th>自我評分</th>-->
+									<th>貢獻評核</th>
+									<th>得分</th>
+                            </thead>
+                            <tbody id="resultList">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 圖表區域 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+								<div class="chart-title">評分來源分析</div>
+                                <div id="scoreComparison"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">評分類型分析</div>
+                                <div id="typeAnalysis"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">能力雷達圖</div>
+                                <div id="skillRadar"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">評分趨勢分析</div>
+                                <div id="scoreTrend"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- 提示訊息 Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">系統訊息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../javascripts/jquery-3.7.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="../javascripts/employee-record.js"></script>
+</body>
+</html>

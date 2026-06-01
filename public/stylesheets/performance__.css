@@ -1,0 +1,267 @@
+/* =========================================================
+   performance.css — 統一風格與主題設定
+   支援：主題變數、暗色模式、自動配色、柔和陰影、漸層風格
+   ========================================================= */
+
+/*  主題變數設定 */
+:root {
+  --primary-color: #121212;           /* 主色（藍紫系） #4b6cb7   #121212*/
+  --accent-color: #6f42c1;            /* 強調色 */
+  --secondary-color: #182848;         /* 深色輔助 */
+  --bg-gradient: linear-gradient(to bottom right, #f7f9fc, #eef2f7);
+  --text-color: #333;
+  --text-light: #555;
+  --card-bg: #252525;
+  --card-radius: 15px;
+  --input-radius: 10px;
+  --shadow: 0 3px 10px rgba(0,0,0,0.1);
+  --transition-fast: 0.2s ease;
+}
+
+/*  深色模式自動切換 */
+/*
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-gradient: linear-gradient(to bottom right, #1f1f2e, #2a2a3d);
+    --text-color: #f2f2f2;
+    --text-light: #ccc;
+    --primary-color: #6c63ff;
+    --accent-color: #a78bfa;
+    --shadow: 0 3px 15px rgba(0,0,0,0.4);
+  }
+}
+*/
+
+/*  全域樣式 
+body {
+  background: var(--bg-gradient);
+  font-family: "Noto Sans TC", "Segoe UI", Arial, sans-serif;
+  color: var(--text-color);
+  min-height: 100vh;
+  line-height: 1.6;
+}*/
+
+/* 全域背景修正 */
+body {
+  background: var(--bg-gradient);
+  color: var(--text-color);
+  font-family: "Noto Sans TC", "Segoe UI", Arial, sans-serif;
+}
+
+/*  導覽列 */
+
+/* 關鍵修正：確保所有漸層都跟隨變數 */
+.navbar, .card-header, .btn-primary, .modal-header {
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color)) !important;
+}
+.navbar {
+  box-shadow: var(--shadow);
+}
+.navbar-brand {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.nav-link {
+  transition: color var(--transition-fast);
+}
+.nav-link:hover {
+  color: #fff;
+  opacity: 0.85;
+}
+.dropdown-menu {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.dropdown-item {
+    color: var(--text-color);
+}
+.dropdown-item:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+/*  卡片外觀 */
+.card {
+  border: none;
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+.card-header {
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border-top-left-radius: var(--card-radius);
+  border-top-right-radius: var(--card-radius);
+}
+.card-body {
+  background-color: #fff;
+  border-bottom-left-radius: var(--card-radius);
+  border-bottom-right-radius: var(--card-radius);
+  padding: 1.5rem;
+}
+/*
+@media (prefers-color-scheme: dark) {
+  .card-body {
+    background-color: #2e2e3f;
+  }
+}
+*/
+
+/*  表單與輸入框 */
+.form-label {
+  font-weight: 500;
+  color: var(--text-light);
+}
+.form-control {
+  border-radius: var(--input-radius);
+  border: 1px solid #ccc;
+  transition: box-shadow var(--transition-fast), border var(--transition-fast);
+}
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 6px rgba(13,110,253,0.4);
+}
+
+/*  表格樣式 */
+/* 原本的表格樣式 */
+.table {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* 新增：固定寬度與自動換行控制 */
+#evaluationContent .table {
+  table-layout: fixed;      /* 固定欄寬分配，不會被文字撐開 */
+  width: 100%;
+  max-width: 1200px;        /* 限制最大寬度，可依需求調整 */
+  word-wrap: break-word;    /* 讓長字自動換行 */
+}
+
+#resultSection .table {
+  table-layout: fixed;
+  width: 100%;
+  word-wrap: break-word;
+}
+
+/* 表頭 */
+.table th {
+  background-color: #e9f0ff;
+  font-weight: 600;
+  color: var(--text-color);
+  white-space: normal;      /* 允許換行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 表格內容 */
+.table td {
+  white-space: normal;      /* 允許自動換行 */
+  overflow: hidden;
+  text-overflow: ellipsis;  /* 超出時加上 ... */
+  vertical-align: middle;   /* 垂直置中 */
+}
+
+/* Hover 效果保持不變 */
+.table-hover tbody tr:hover {
+  background-color: #f5f9ff;
+  transition: background-color var(--transition-fast);
+}
+
+
+/*.table {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.table th {
+  background-color: #e9f0ff;
+  font-weight: 600;
+  color: var(--text-color);
+}
+.table-hover tbody tr:hover {
+  background-color: #f5f9ff;
+  transition: background-color var(--transition-fast);
+}*/
+/*
+@media (prefers-color-scheme: dark) {
+  .table {
+    background-color: #2a2a3a;
+  }
+  .table th {
+    background-color: #3a3a4a;
+    color: #fff;
+  }
+  .table-hover tbody tr:hover {
+    background-color: #44445a;
+  }
+}
+*/
+
+/*  按鈕樣式 */
+.btn-outline-primary {
+    color: var(--text-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/*  Modal 彈窗 */
+.modal-content {
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.modal-header {
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.modal-body {
+  color: var(--text-color);
+}
+.modal-footer {
+  border-top: none;
+}
+
+/* ️ 其他小細節 */
+h5 {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='%23333' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+/*
+@media (prefers-color-scheme: dark) {
+  select.form-control {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg width='16' height='16' fill='%23ccc' xmlns='http://www.w3.org/2000/svg'><path d='M4 6l4 4 4-4'/></svg>");
+  }
+}
+*/
+
+/*  輕微動畫效果 */
+.card, .btn, .form-control {
+  transition: all var(--transition-fast);
+}
+
+.special-text {
+    color:  #D0D0D0;
+    font-weight: bold;
+}
+
+.dropdown-item.active, 
+.dropdown-item:active {
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); /* 使用你定義的深色漸層 */
+    color: #ffffff; /* 確保文字是白色的 */
+    border: none;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>msg 上傳</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+</head>
+<body>
+  <h1>上傳 msg 檔案</h1>
+  <div>
+    <input id='u_file' type="file"  name="file" accept=".msg" required>
+  </div>
+  <button onclick="upload()">上傳</button>
+
+  <script>
+    function upload(){
+	  var msg = document.getElementById('u_file');
+	  if (!/.msg$/.test(msg.value)) {
+	      alert("檔案格式不正確!")
+		  return;
+	  }
+	  var formData = new FormData();
+	  formData.append('file', msg.files[0]);
+	  formData.append('id', "F7F WLAN & BT Only Baseline");
+	  formData.append('ori_filename', msg.files[0].name.replace('.msg', ''));
+	  formData.append('type', "Award");
+	  
+	  let type = "RFQ";
+	  if (type == "RFQ"){
+	      console.log("aaaaaaaaaaaaaaaa");
+		  var url = "/file/upload_file";
+		  $.ajax({
+			url: url,
+			type: "POST",
+			data: formData,
+			processData: false,
+			contentType: false,
+			success: function(res) {
+			   if (res.status == 0) {
+				 alert("upload successfully");
+			   }
+			},
+			error: function(err) {
+				console.log(err);
+			}
+		  });
+	  }
+	  else if (type == "Award") {
+	  }
+	  else {
+	  }
+	  return;
+	  var url = "/file/upload_award";
+	  $.ajax({
+	    url: url,
+		type: "POST",
+		data: formData,
+		processData: false,
+		contentType: false,
+		success: function(res) {
+		   if (res.status == 0) {
+		     alert("upload successfully");
+		   }
+		},
+		error: function(err) {
+		    console.log(err);
+		}
+	  });
+	}
+    
+  </script>
+</body>
+</html>

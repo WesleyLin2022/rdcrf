@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查詢考績紀錄 - 績效評核系統</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../stylesheets/performance.css">
+    <script src="../javascripts/d3.v7.min.js"></script>
+	<link rel="icon" type="image/png" href="../images/kpi_logo_gold_rmbg_resized.png">
+    <style>
+        .chart-container {
+            background: #fff; /* 圖表卡片背景色（白底，常見於儀表板） */
+			height: 420px;    /* 固定圖表卡片高度，確保多個圖表底部對齊 */
+			display: flex;    /* 使用 Flexbox 排版，讓內部元素能垂直排列 */
+			flex-direction: column;  /* 由上到下排列：標題在上，圖表在下 */
+			border-radius: 8px;    /* 圓角，讓卡片視覺更柔和 */
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);   /* 卡片陰影，增加層次感 */
+			padding: 15px;   /* 內距，避免內容貼邊 */
+			margin-bottom: 20px;  /* 與下方區塊保持間距（Bootstrap row 間距補強） */
+        }
+        .chart-title {
+            font-size: 1.1rem;  /* 標題字體大小 */
+			font-weight: 600;   /* 半粗體，強調區塊標題 */
+            margin-bottom: 15px;  /* 標題與圖表之間的間距 */
+            color: #333;    /* 深灰色，避免純黑太刺眼 */
+            text-align: center;  /* 標題置中 */
+			flex-shrink: 0;  /* ❗關鍵：防止在高度不足時被壓縮，確保標題高度固定 */
+        }
+		#scoreComparison,
+        #supervisorPieChart,
+		#selfScoreSingleDonut,
+		#selfTypeDonut {
+            flex: 1;                    /* ❗關鍵：撐滿 chart-container 中「標題以外的剩餘高度」 → 讓 SVG 依容器高度繪製 */
+        }
+		.toggle-link {
+            text-align: right;    /* 整個區塊內容靠右對齊 */
+            margin-bottom: 20px;  /* 與下方元素保持 20px 間距 */
+        }
+
+        .toggle-link a {
+            text-decoration: none;  /* 移除底線 */
+            color: #0d6efd;         /* 連結文字顏色（藍色） */
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .toggle-link a:hover {
+            text-decoration: underline;  /* 滑鼠移上時顯示底線，提供互動感 */
+        }
+		/* 統一 AI 評語區塊的表格樣式 */
+		#multiTableSection table {
+			table-layout: fixed;   /*  固定表格欄寬，強制等寬 */
+			width: 100%;           /*  讓表格撐滿容器 */
+			border-collapse: collapse;
+			text-align: left;    /*  欄位內容置中 */
+			word-wrap: break-word; /*  自動換行避免爆版 */
+		}
+
+		/* 表頭和儲存格樣式 */
+		#multiTableSection th,
+		#multiTableSection td {
+			width: 30%;            /* 假設4欄，平均25%，可依實際欄位數調整 */
+			padding: 8px;
+			border: 1px solid #dee2e6;
+		}
+    </style>
+</head>
+<body>
+    <!-- 導航欄與之前相同 -->
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="performance.html">
+                <img src="../images/kpi_logo_gold_rmbg_resized.png" alt="Logo" height="70" class="me-2">
+                <span>績效評核系統</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" id="employeeDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            員工評核作業
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="employeeDropdown">
+                            <li><a class="dropdown-item" href="self-evaluation.html">填寫自我評核</a></li>
+                            <li><a class="dropdown-item active" href="performance-record.html">查詢考績紀錄</a></li>
+                            <li><a class="dropdown-item" href="peer-evaluation.html">填寫同事評核</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="managerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            主管評核作業
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="managerDropdown">
+                            <li><a class="dropdown-item" href="manager-evaluation.html">填寫員工評核</a></li>
+                            <li><a class="dropdown-item" href="employee-record.html">查詢員工紀錄</a></li>
+							<li><a class="dropdown-item" href="employee-export.html">員工紀錄匯出</a></li>
+                            <li><a class="dropdown-item" href="peer-setting.html">設定員工互評</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto align-items-center">
+				    <li class="nav-item">
+                        <span class="nav-link text-light me-3" id="userId"></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light btn-sm" href="#" id="logoutBtn">登出</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">考績查詢</h5>
+            </div>
+            <div class="card-body">
+                <form id="searchForm" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="year" class="form-label">年度</label>
+                            <select class="form-control" id="year" required>
+                                <option value="">請選擇年度</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="period" class="form-label">期別</label>
+                            <select class="form-control" id="period" required>
+                                <option value="">請選擇期別</option>
+                                <option value="1">年中</option>
+                                <option value="2">年底</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">查詢</button>
+                        </div>
+                    </div>
+                </form>
+				
+				<!-- 🔹 切換連結 -->
+                <div class="toggle-link">
+                    <a id="toggleView">KPI內容</a>
+                </div>
+
+                <div id="resultSection" class="d-none">
+                    <!--<h6 class="mb-3">考績結果</h6>-->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>評核類型</th>
+                                    <th>項目要點</th>
+                                    <th>具體貢獻描述1</th>
+                                    <th>具體貢獻描述2</th>
+                                    <th>具體貢獻描述3</th>
+                                    <!--<th>自評分數</th>-->
+                                    <th>主管評分</th>
+                                    <!--<th>同儕評分</th>-->
+                                    <!--<th>最終得分</th>-->
+                                </tr>
+                            </thead>
+                            <tbody id="resultList">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 圖表區域 -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">評分差異分析</div>
+                                <div id="scoreComparison"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+								<div class="chart-title">主管評分分析</div>
+                                <div id="supervisorPieChart"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">員工自評分析</div>
+								<div id="selfTypeDonut"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+								<div class="chart-title">自評設定完成度</div>
+                                <div id="selfScoreSingleDonut"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				<!-- 🔹 新增四個表格 -->
+                <div id="multiTableSection">
+
+                    <div class="section-title">一、日常工作項目</div>
+                    <table class="table table-bordered custom-table">
+                        <thead>
+                            <tr>
+                                <th>優點</th>
+                                <th>缺點</th>
+                                <th>改進建議</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dailyWorkTable">
+                            <tr>
+                                <td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="section-title">二、AI的工作項目</div>
+                    <table class="table table-bordered custom-table">
+                        <thead>
+                            <tr>
+                                <th>優點</th>
+                                <th>缺點</th>
+                                <th>改進建議</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aiWorkTable">
+                            <tr>
+                                <td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="section-title">三、加分的工作項目</div>
+                    <table class="table table-bordered custom-table">
+                        <thead>
+                            <tr>
+                                <th>優點</th>
+                                <th>缺點</th>
+                                <th>改進建議</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bonusWorkTable">
+                            <tr>
+                                <td></td><td></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="section-title">四、整體表現</div>
+                    <table class="table table-bordered custom-table">
+                        <thead>
+                            <tr>
+                                <th>評語</th>
+                            </tr>
+                        </thead>
+                        <tbody id="level1PerformanceTable">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+					
+					<div class="section-title">五、AI自我評語</div>
+                    <table class="table table-bordered custom-table">
+                        <thead>
+                            <tr>
+                                <th>評語</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selfEvaluationTable">
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+					
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- 提示訊息 Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">系統訊息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+	<script src="../javascripts/jquery-3.7.1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="../javascripts/performance-record.js"></script>
+</body>
+</html>
